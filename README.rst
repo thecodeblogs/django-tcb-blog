@@ -16,9 +16,13 @@ Quick start
 
    path('blog_api/', include('blog.urls')),
 
-   3. Run ``python manage.py migrate`` to create the blog models.
+3. Setup a module named 'backend'
 
-   4. Start the development server and visit http://127.0.0.1:8000/admin/
-         to create a poll (you'll need the Admin app enabled).
+4. Using celery.py.sample as a guide, setup celery do that tasks will work
 
-   5. Visit http://127.0.0.1:8000/blog_api/ to see something.
+5. Run ``python manage.py migrate`` to create the blog models.
+
+6. Start the development server and visit http://127.0.0.1:8000/admin/
+     to create a poll (you'll need the Admin app enabled).
+
+7. Visit http://127.0.0.1:8000/blog_api/ to see something.
