@@ -13,7 +13,7 @@ from rest_framework.decorators import action
 
 from blog.models import EntryEnvelope, Comment
 from blog.permissions import IsOwnerOrReadOnly
-from blog.serializers import EntrySerializer, UserSerializer, CommentSerializer
+from blog.serializers import EntrySerializer, UserSerializer, CommentSerializer, SyncConfigSerializer
 
 
 def get_entry_from_params(params):
@@ -95,3 +95,16 @@ class ListUser(generics.ListAPIView):
 
     def get_queryset(self):
         return self.get_object(self.request.user.id)
+
+
+class SyncConfig(generics.RetrieveAPIView):
+    serializer_class = SyncConfigSerializer
+    def get(self, request):
+        return Response(
+            {
+                'entries_endpoint': 'blog_api/entries/?published=true',
+                'images_endpoint': '',
+            },
+            status=status.HTTP_200_OK
+        )
+
