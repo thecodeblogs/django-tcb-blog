@@ -117,12 +117,10 @@ class EntryEnvelope(models.Model):
         self.publish_date = self.entry.get('publish_date')
         self.version = self.entry.get('version')
 
-        print(self.entry)
         tags = self.entry.get('tags')
         if tags:
             for entry_tag in tags:
                 tag, created = Tag.objects.get_or_create(label=entry_tag)
-                self.tags.add(tag)
 
     class Meta:
         abstract = False
@@ -144,6 +142,11 @@ def manage_publish_states(entry_envelope_id):
 
 @receiver(post_save, sender=EntryEnvelope)
 def entry_post_save(sender, instance, *args, **kwargs):
+    tags = instance.entry.get('tags')
+    if tags:
+        for entry_tag in tags:
+            tag, created = Tag.objects.get_or_create(label=entry_tag)
+            self.tags.add(tag)
     if instance.published:
         manage_publish_states.delay(str(instance.id))
 
