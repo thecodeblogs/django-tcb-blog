@@ -119,9 +119,10 @@ class EntryEnvelope(models.Model):
 
         print(self.entry)
         tags = self.entry.get('tags')
-        for entry_tag in tags:
-            tag, created = Tag.objects.get_or_create(label=entry_tag)
-            self.tags.add(tag)
+        if tags:
+            for entry_tag in tags:
+                tag, created = Tag.objects.get_or_create(label=entry_tag)
+                self.tags.add(tag)
 
     class Meta:
         abstract = False
