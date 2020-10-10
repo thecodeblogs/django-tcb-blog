@@ -26,6 +26,7 @@ class EntrySerializer(serializers.BaseSerializer):
             'published': instance.entry.get('published'),
             'publish_date': instance.entry.get('publish_date'),
             'version': instance.entry.get('version'),
+            'tags': instance.entry.get('tags'),
             '__server_generated_properties': { 'author_id': instance.author.id}
         }
 
@@ -39,6 +40,7 @@ class EntrySerializer(serializers.BaseSerializer):
         published = data.get('published')
         publish_date = data.get('publish_date')
         version = data.get('version')
+        tags = data.get('tags')
 
         return {
             'id': id,
@@ -49,7 +51,8 @@ class EntrySerializer(serializers.BaseSerializer):
             'slug': slug,
             'published': published,
             'publish_date': publish_date,
-            'version': version
+            'version': version,
+            'tags': tags
         }
 
     def update(self, instance: Any, validated_data: Any) -> Any:
@@ -82,11 +85,13 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    # TODO: Do we need entry here?
     entry = serializers.SerializerMethodField()
     user = UserSerializer
     user_display_name = serializers.SerializerMethodField('get_user_display_name')
     gravatar_url = serializers.SerializerMethodField('get_gravatar_url')
 
+    # TODO: Do we need entry here?
     def get_entry(self, comment):
         return comment.entry_envelope.entry
 
@@ -98,4 +103,10 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ('created_on', 'content', 'user_display_name', 'entry', 'entry_envelope', 'user', 'gravatar_url')
+        fields = ('id', 'created_on', 'content', 'user_display_name', 'entry', 'user', 'gravatar_url')
+
+
+class SyncConfigSerializer(serializers.Serializer):
+    entries_endpoint = serializers.CharField()
+    images_endpoint = serializers.CharField()
+

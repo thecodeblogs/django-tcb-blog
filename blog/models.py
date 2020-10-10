@@ -32,6 +32,8 @@ class Profile(models.Model):
         null=False, blank=False, default=False
     )
     gravatar_url = models.CharField(max_length=255, null=True, blank=True)
+    token = models.CharField(max_length=255, null=True, blank=True)
+    url = models.CharField(max_length=255, null=True, blank=True, default="https://www.thecodeblogs.com")
 
 
 @receiver(post_save, sender=User)
@@ -55,6 +57,10 @@ def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
 
 
+class Tag(models.Model):
+    label = models.CharField(max_length=255, null=False, blank=False)
+
+
 class EntryEnvelope(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     entry_id = models.UUIDField(null=True, blank=True)
@@ -68,6 +74,8 @@ class EntryEnvelope(models.Model):
     entry = JSONField()
     title = models.TextField(null=True)
     slug = models.TextField(null=True)
+
+    tags = models.ManyToManyField(Tag, related_name="entries")
 
     version = models.IntegerField(null=True, blank=True, default=1)
     published = models.BooleanField(null=False, default=False)
@@ -109,6 +117,12 @@ class EntryEnvelope(models.Model):
         self.publish_date = self.entry.get('publish_date')
         self.version = self.entry.get('version')
 
+        print(self.entry)
+        tags = self.entry.get('tags')
+        for entry_tag in tags:
+            tag, created = Tag.objects.get_or_create(label=entry_tag)
+            self.tags.add(tag)
+
     class Meta:
         abstract = False
 
@@ -145,3 +159,4 @@ class Comment(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now_add=True)
     content = models.TextField(null=False)
+
