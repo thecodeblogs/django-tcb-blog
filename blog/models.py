@@ -146,7 +146,7 @@ def entry_post_save(sender, instance, *args, **kwargs):
     if tags:
         for entry_tag in tags:
             tag, created = Tag.objects.get_or_create(label=entry_tag)
-            self.tags.add(tag)
+            instance.tags.add(tag)
     if instance.published:
         manage_publish_states.delay(str(instance.id))
 
