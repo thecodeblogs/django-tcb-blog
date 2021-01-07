@@ -11,9 +11,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
-from blog.models import EntryEnvelope, Comment
+from blog.models import EntryEnvelope, Comment, Tag
 from blog.permissions import IsOwnerOrReadOnly
-from blog.serializers import EntrySerializer, UserSerializer, CommentSerializer, SyncConfigSerializer
+from blog.serializers import EntrySerializer, UserSerializer, CommentSerializer, SyncConfigSerializer, TagSerializer
 
 
 def get_entry_from_params(params):
@@ -74,10 +74,10 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         envelope = get_entry_from_params(self.request.query_params)
-        request.data['entry_envelope'] = envelope.id
         request.data['user'] = self.request.user.id
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        serializer.validated_data['entry_envelope'] = envelope
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
@@ -108,3 +108,10 @@ class SyncConfig(generics.RetrieveAPIView):
             status=status.HTTP_200_OK
         )
 
+
+class TagViewSet(viewsets.ModelViewSet):
+    serializer_class = TagSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Tag.objects.all();

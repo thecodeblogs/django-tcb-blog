@@ -3,7 +3,7 @@ from typing import Any
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from blog.models import Comment, EntryEnvelope
+from blog.models import Comment, EntryEnvelope, Tag
 
 
 class EntrySerializer(serializers.BaseSerializer):
@@ -110,3 +110,8 @@ class SyncConfigSerializer(serializers.Serializer):
     entries_endpoint = serializers.CharField()
     images_endpoint = serializers.CharField()
 
+
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = '__all__'
