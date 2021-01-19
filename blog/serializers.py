@@ -3,7 +3,7 @@ from typing import Any
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from blog.models import Comment, EntryEnvelope, Tag
+from blog.models import ( Comment, EntryEnvelope, Tag, View, Interaction )
 
 
 class EntrySerializer(serializers.BaseSerializer):
@@ -114,4 +114,21 @@ class SyncConfigSerializer(serializers.Serializer):
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
+        fields = '__all__'
+
+
+class ViewSerializer(serializers.ModelSerializer):
+    entry = serializers.SerializerMethodField()
+
+    def get_entry(self, obj):
+        return obj.entry_envelope.entry
+
+    class Meta:
+        model = View
+        fields = ('id', 'entry')
+
+
+class InteractionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Interaction
         fields = '__all__'

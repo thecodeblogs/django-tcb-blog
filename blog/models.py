@@ -2,7 +2,6 @@ import hashlib
 import uuid
 
 from django.contrib.auth.models import User
-from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
@@ -71,7 +70,7 @@ class EntryEnvelope(models.Model):
         on_delete=models.CASCADE,
         related_name="author"
     )
-    entry = JSONField()
+    entry = models.JSONField()
     title = models.TextField(null=True)
     slug = models.TextField(null=True)
 
@@ -163,4 +162,30 @@ class Comment(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now_add=True)
     content = models.TextField(null=False)
+
+
+class View(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    entry_envelope = models.ForeignKey(
+        EntryEnvelope,
+        on_delete=models.CASCADE,
+    )
+    user = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+    )
+    session_uid = models.UUIDField(blank=True, null=True)
+
+
+class Interaction(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    content = models.JSONField()
+    user = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+    )
 

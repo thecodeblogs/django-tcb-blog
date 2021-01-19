@@ -1,3 +1,5 @@
+import json
+import uuid
 from typing import Any
 from urllib.request import Request
 
@@ -11,9 +13,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
-from blog.models import EntryEnvelope, Comment, Tag
-from blog.permissions import IsOwnerOrReadOnly
-from blog.serializers import EntrySerializer, UserSerializer, CommentSerializer, SyncConfigSerializer, TagSerializer
+from blog.models import EntryEnvelope, Comment, Tag, View, Interaction
+from blog.permissions import IsOwnerOrReadOnly, CanPostButNotRead
+from blog.serializers import ( EntrySerializer, UserSerializer, CommentSerializer, SyncConfigSerializer, TagSerializer,
+                              ViewSerializer, InteractionSerializer)
 
 
 def get_entry_from_params(params):
@@ -115,3 +118,53 @@ class TagViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Tag.objects.all();
+
+
+class ViewViewSet(viewsets.ModelViewSet):
+    serializer_class = ViewSerializer
+    permission_classes = [CanPostButNotRead]
+
+    def get_queryset(self):
+        return View.objects.all();
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        e_id = serializer.initial_data['entry']
+        serializer.is_valid(raise_exception=True)
+
+        ee = EntryEnvelope.objects.filter(entry_id=e_id)[0]
+        serializer.validated_data['entry_envelope'] = ee
+
+        if request.user.is_anonymous:
+            sid_as_string = request.session.get('session_uid', None)
+            if sid_as_string is None:
+                sid = uuid.uuid4()
+                request.session['session_uid'] = str(sid)
+            else:
+                sid = uuid.UUID(sid_as_string)
+
+        if request.user.is_anonymous:
+            recorded_view = View.objects.filter(entry_envelope=ee, session_uid=sid)
+        else:
+            recorded_view = View.objects.filter(entry_envelope=ee, user=request.user)
+
+        # Already recorded
+        if recorded_view.count() > 0:
+            return Response([], status=status.HTTP_200_OK)
+        else:
+            self.perform_create(serializer)
+            if request.user.is_anonymous:
+                serializer.instance.session_uid = sid
+            else:
+                serializer.instance.user = request.user
+
+            serializer.instance.save()
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+class InteractionViewSet(viewsets.ModelViewSet):
+    serializer_class = InteractionSerializer
+    permission_classes = [CanPostButNotRead]
+
+    def get_queryset(self):
+        return Interaction.objects.all();
