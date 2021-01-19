@@ -1,6 +1,15 @@
 from rest_framework import permissions
 
 
+class CanPostButNotRead(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        print('here')
+        if request.method in ('POST'):
+            print('method in post')
+            return True
+        return obj.entry_envelope.author == request.user
+
+
 class IsOwnerOrReadOnly(permissions.BasePermission):
     """
     Custom permission to only allow owners of an object to edit it.
