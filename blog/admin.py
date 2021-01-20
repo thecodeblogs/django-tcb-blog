@@ -1,6 +1,7 @@
 from django.contrib import admin
 
-from blog.models import EntryEnvelope, Profile, Comment, Tag
+from blog.models import ( EntryEnvelope, Profile, Comment, Tag, View,
+                         Interaction )
 
 
 class EntryAdmin(admin.ModelAdmin):
@@ -24,3 +25,5 @@ admin.site.register(Profile)
 admin.site.register(EntryEnvelope, EntryAdmin)
 admin.site.register(Comment)
 admin.site.register(Tag)
+admin.site.register(View)
+admin.site.register(Interaction)
