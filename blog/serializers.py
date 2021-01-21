@@ -27,7 +27,10 @@ class EntrySerializer(serializers.BaseSerializer):
             'publish_date': instance.entry.get('publish_date'),
             'version': instance.entry.get('version'),
             'tags': instance.entry.get('tags'),
-            '__server_generated_properties': { 'author_id': instance.author.id}
+            'views': instance.view_set.all().count(),
+            '__server_generated_properties': {
+                'author_id': instance.author.id,
+            }
         }
 
     def to_internal_value(self, data: Any) -> Any:
