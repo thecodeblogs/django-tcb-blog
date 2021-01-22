@@ -134,6 +134,7 @@ class ViewViewSet(viewsets.ModelViewSet):
 
         ee = EntryEnvelope.objects.filter(entry_id=e_id)[0]
         serializer.validated_data['entry_envelope'] = ee
+        serializer.validated_data['entry_id'] = ee.entry.get('id')
 
         if request.user.is_anonymous:
             sid_as_string = request.session.get('session_uid', None)

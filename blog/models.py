@@ -170,6 +170,7 @@ class View(models.Model):
         EntryEnvelope,
         on_delete=models.CASCADE,
     )
+    entry_id = models.UUIDField(default=None, blank=True, null=True)
     user = models.ForeignKey(
         User,
         null=True,

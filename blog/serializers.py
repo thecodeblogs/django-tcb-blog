@@ -16,6 +16,7 @@ class EntrySerializer(serializers.BaseSerializer):
     slug = serializers.SerializerMethodField()
 
     def to_representation(self, instance: Any) -> Any:
+        view_count = View.objects.filter(entry_id=instance.entry.get('id')).count()
         return {
             'id': instance.entry.get('id'),
             'title': instance.entry.get('title'),
@@ -27,7 +28,7 @@ class EntrySerializer(serializers.BaseSerializer):
             'publish_date': instance.entry.get('publish_date'),
             'version': instance.entry.get('version'),
             'tags': instance.entry.get('tags'),
-            'views': instance.view_set.all().count(),
+            'views': view_count,
             '__server_generated_properties': {
                 'author_id': instance.author.id,
             }
