@@ -141,4 +141,4 @@ class InteractionSerializer(serializers.ModelSerializer):
 class VisitorProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = VisitorProfile
-        fields = '__all__'
+        fields = ('id', 'device', 'family', 'language', 'name', 'os_version', 'telemetry', 'version')

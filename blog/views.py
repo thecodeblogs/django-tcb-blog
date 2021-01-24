@@ -7,7 +7,7 @@ from django.contrib.auth.models import User, AnonymousUser
 from django.db.models import Q
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, generics, status
+from rest_framework import viewsets, generics, status, mixins
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -120,7 +120,8 @@ class TagViewSet(viewsets.ModelViewSet):
         return Tag.objects.all();
 
 
-class ViewViewSet(viewsets.ModelViewSet):
+class ViewViewSet(mixins.CreateModelMixin,
+                  viewsets.GenericViewSet):
     serializer_class = ViewSerializer
     permission_classes = [CanPostButNotRead]
 
@@ -163,7 +164,8 @@ class ViewViewSet(viewsets.ModelViewSet):
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-class InteractionViewSet(viewsets.ModelViewSet):
+class InteractionViewSet(mixins.CreateModelMixin,
+                         viewsets.GenericViewSet):
     serializer_class = InteractionSerializer
     permission_classes = [CanPostButNotRead]
 
@@ -171,7 +173,8 @@ class InteractionViewSet(viewsets.ModelViewSet):
         return Interaction.objects.all()
 
 
-class VisitorProfileViewSet(viewsets.ModelViewSet):
+class VisitorProfileViewSet(mixins.CreateModelMixin,
+                            viewsets.GenericViewSet):
     serializer_class = VisitorProfileSerializer
     permission_classes = [IsAuthenticated]
 
