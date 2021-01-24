@@ -176,7 +176,7 @@ class InteractionViewSet(mixins.CreateModelMixin,
 class VisitorProfileViewSet(mixins.CreateModelMixin,
                             viewsets.GenericViewSet):
     serializer_class = VisitorProfileSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [CanPostButNotRead]
 
     def get_queryset(self):
         return VisitorProfile.objects.all()
