@@ -190,3 +190,44 @@ class Interaction(models.Model):
         on_delete=models.CASCADE,
     )
 
+
+class VisitorProfile(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+    )
+    session_uid = models.UUIDField(blank=True, null=True)
+
+    telemetry = models.JSONField()
+
+    name = models.TextField(null=True,blank=True)
+    family = models.TextField(null=True,blank=True)
+    version = models.TextField(null=True,blank=True)
+    major = models.IntegerField(null=True,blank=True)
+    minor = models.IntegerField(null=True,blank=True)
+    patch = models.IntegerField(null=True,blank=True)
+
+    def telemetry_formatted(self):
+        # dump the json with indentation set
+
+        # example for detail_text TextField
+        # json_obj = json.loads(self.detail_text)
+        # data = json.dumps(json_obj, indent=2)
+
+        # with JSON field, no need to do .loads
+        data = json.dumps(self.telemetry, indent=2)
+
+        # format it with pygments and highlight it
+        formatter = HtmlFormatter(style='colorful')
+        response = highlight(data, JsonLexer(), formatter)
+
+        # include the style sheet
+        style = "<style>" + formatter.get_style_defs() + "</style><br/>"
+
+        return mark_safe(style + response)
+
+    telemetry.short_description = 'Telemetry Formatted'
+

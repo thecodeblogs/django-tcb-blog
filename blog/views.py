@@ -13,10 +13,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
-from blog.models import EntryEnvelope, Comment, Tag, View, Interaction
+from blog.models import EntryEnvelope, Comment, Tag, View, Interaction, VisitorProfile
 from blog.permissions import IsOwnerOrReadOnly, CanPostButNotRead
 from blog.serializers import ( EntrySerializer, UserSerializer, CommentSerializer, SyncConfigSerializer, TagSerializer,
-                              ViewSerializer, InteractionSerializer)
+                              ViewSerializer, InteractionSerializer, VisitorProfileSerializer)
 
 
 def get_entry_from_params(params):
@@ -168,4 +168,12 @@ class InteractionViewSet(viewsets.ModelViewSet):
     permission_classes = [CanPostButNotRead]
 
     def get_queryset(self):
-        return Interaction.objects.all();
+        return Interaction.objects.all()
+
+
+class VisitorProfileViewSet(viewsets.ModelViewSet):
+    serializer_class = VisitorProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return VisitorProfile.objects.all()

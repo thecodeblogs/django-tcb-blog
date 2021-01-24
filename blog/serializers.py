@@ -3,7 +3,7 @@ from typing import Any
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from blog.models import ( Comment, EntryEnvelope, Tag, View, Interaction )
+from blog.models import ( Comment, EntryEnvelope, Tag, View, Interaction, VisitorProfile )
 
 
 class EntrySerializer(serializers.BaseSerializer):
@@ -135,4 +135,10 @@ class ViewSerializer(serializers.ModelSerializer):
 class InteractionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Interaction
+        fields = '__all__'
+
+
+class VisitorProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VisitorProfile
         fields = '__all__'

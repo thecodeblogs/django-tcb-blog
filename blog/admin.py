@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from blog.models import ( EntryEnvelope, Profile, Comment, Tag, View,
-                         Interaction )
+                         Interaction, VisitorProfile )
 
 
 class EntryAdmin(admin.ModelAdmin):
@@ -20,6 +20,14 @@ class EntryAdmin(admin.ModelAdmin):
                        'defunct')
     ordering = ('-edit_date', 'entry_id')
 
+class VisitorProfileAdmin(admin.ModelAdmin):
+    fieldsets = [
+        (None, {'fields': ['session_uid', 'user', 'name', 'family', 'version']}),
+        ('Telemetry', {'fields': ['telemetry_formatted']})
+    ]
+
+    readonly_fields = ('telemetry_formatted',)
+
 
 admin.site.register(Profile)
 admin.site.register(EntryEnvelope, EntryAdmin)
@@ -27,3 +35,4 @@ admin.site.register(Comment)
 admin.site.register(Tag)
 admin.site.register(View)
 admin.site.register(Interaction)
+admin.site.register(VisitorProfile, VisitorProfileAdmin)
