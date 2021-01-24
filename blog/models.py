@@ -203,12 +203,15 @@ class VisitorProfile(models.Model):
 
     telemetry = models.JSONField()
 
+    device = models.TextField(null=True,blank=True)
+    os_version = models.TextField(null=True,blank=True)
     name = models.TextField(null=True,blank=True)
     family = models.TextField(null=True,blank=True)
     version = models.TextField(null=True,blank=True)
     major = models.IntegerField(null=True,blank=True)
     minor = models.IntegerField(null=True,blank=True)
     patch = models.IntegerField(null=True,blank=True)
+    language = models.TextField(null=True,blank=True)
 
     def telemetry_formatted(self):
         # dump the json with indentation set

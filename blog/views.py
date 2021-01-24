@@ -177,3 +177,59 @@ class VisitorProfileViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return VisitorProfile.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        if request.user.is_anonymous:
+            sid_as_string = request.session.get('session_uid', None)
+            if sid_as_string is None:
+                sid = uuid.uuid4()
+                request.session['session_uid'] = str(sid)
+            else:
+                sid = uuid.UUID(sid_as_string)
+
+        if request.user.is_anonymous:
+            profiles = VisitorProfile.objects.filter(session_uid=sid)
+        else:
+            profiles = VisitorProfile.objects.filter(user=request.user)
+
+        if profiles.count() > 0:
+            exists = False
+            for profile in profiles:
+                if (
+                    profile.name == serializer.validated_data['name'] and
+                    profile.family == serializer.validated_data['family'] and
+                    profile.version == serializer.validated_data['version'] and
+                    profile.device == serializer.validated_data['device'] and
+                    profile.os_version == serializer.validated_data['os_version']
+                ):
+                    exists = True
+                    break
+            if exists:
+                return Response([], status=status.HTTP_200_OK)
+            else:
+                self.perform_create(serializer)
+
+                if request.user.is_anonymous:
+                    serializer.instance.session_uid = sid
+                else:
+                    serializer.instance.user = request.user
+
+                serializer.instance.save()
+
+                headers = self.get_success_headers(serializer.data)
+                return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        else:
+            self.perform_create(serializer)
+
+            if request.user.is_anonymous:
+                serializer.instance.session_uid = sid
+            else:
+                serializer.instance.user = request.user
+
+            serializer.instance.save()
+
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)

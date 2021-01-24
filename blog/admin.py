@@ -22,7 +22,7 @@ class EntryAdmin(admin.ModelAdmin):
 
 class VisitorProfileAdmin(admin.ModelAdmin):
     fieldsets = [
-        (None, {'fields': ['session_uid', 'user', 'name', 'family', 'version']}),
+        (None, {'fields': ['session_uid', 'user', 'name', 'family', 'version', 'device', 'language', 'os_version']}),
         ('Telemetry', {'fields': ['telemetry_formatted']})
     ]
 
