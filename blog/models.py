@@ -1,5 +1,6 @@
 import hashlib
 import uuid
+from datetime import datetime
 
 from django.contrib.auth.models import User
 from django.db import models
@@ -166,6 +167,8 @@ class Comment(models.Model):
 
 class View(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    created_on = models.DateTimeField(auto_now_add=True)
+    modified_on = models.DateTimeField(auto_now_add=True)
     entry_envelope = models.ForeignKey(
         EntryEnvelope,
         on_delete=models.CASCADE,
@@ -182,6 +185,8 @@ class View(models.Model):
 
 class Interaction(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    created_on = models.DateTimeField(auto_now_add=True)
+    modified_on = models.DateTimeField(auto_now_add=True)
     content = models.JSONField()
     user = models.ForeignKey(
         User,
@@ -193,6 +198,8 @@ class Interaction(models.Model):
 
 class VisitorProfile(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    created_on = models.DateTimeField(auto_now_add=True)
+    modified_on = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(
         User,
         null=True,
