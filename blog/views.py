@@ -172,6 +172,29 @@ class InteractionViewSet(mixins.CreateModelMixin,
     def get_queryset(self):
         return Interaction.objects.all()
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        if request.user.is_anonymous:
+            sid_as_string = request.session.get('session_uid', None)
+            if sid_as_string is None:
+                sid = uuid.uuid4()
+                request.session['session_uid'] = str(sid)
+            else:
+                sid = uuid.UUID(sid_as_string)
+
+        self.perform_create(serializer)
+        if request.user.is_anonymous:
+            serializer.instance.session_uid = sid
+        else:
+            serializer.instance.user = request.user
+
+        serializer.instance.save()
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
 
 class VisitorProfileViewSet(mixins.CreateModelMixin,
                             viewsets.GenericViewSet):

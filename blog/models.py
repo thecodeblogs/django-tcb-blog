@@ -194,6 +194,7 @@ class Interaction(models.Model):
         blank=True,
         on_delete=models.CASCADE,
     )
+    session_uid = models.UUIDField(blank=True, null=True)
 
 
 class VisitorProfile(models.Model):
