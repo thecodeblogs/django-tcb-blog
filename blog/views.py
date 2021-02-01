@@ -270,9 +270,8 @@ class EntriesFeed(Feed):
     description = "Every article posted to this blog"
 
     def items(self):
-        return EntryEnvelope.objects.filter(defunct=False).order_by('-create_date', 'entry_id',
+        return EntryEnvelope.objects.filter(published=True, defunct=False).order_by('-create_date', 'entry_id',
                                                                      '-version').distinct('create_date', 'entry_id')
-
     def item_title(self, item):
         return item.title
 
