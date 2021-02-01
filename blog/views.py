@@ -7,6 +7,9 @@ from django.contrib.auth.models import User, AnonymousUser
 from django.db.models import Q
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
+from django.contrib.syndication.views import Feed
+from django.contrib.sites.shortcuts import get_current_site
+
 from rest_framework import viewsets, generics, status, mixins
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
@@ -259,3 +262,22 @@ class VisitorProfileViewSet(mixins.CreateModelMixin,
 
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class EntriesFeed(Feed):
+    title = "All Articles"
+    link = "/blog/"
+    description = "Every article posted to this blog"
+
+    def items(self):
+        return EntryEnvelope.objects.filter(defunct=False).order_by('-create_date', 'entry_id',
+                                                                     '-version').distinct('create_date', 'entry_id')
+
+    def item_title(self, item):
+        return item.title
+
+    def item_description(self, item):
+        return ""
+
+    def item_link(self, item):
+        return '/blog/' + str(item.slug) + '/';
