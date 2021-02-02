@@ -9,6 +9,5 @@ with open(path.join(this_directory, 'README.rst'), encoding='utf-8') as f:
 setup(
     name='django-tcb-blog',
     # other arguments omitted
-    long_description=long_description,
-    long_description_content_type='text/x-rst'
+    long_description=long_description
 )

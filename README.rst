@@ -1,6 +1,6 @@
-=====
+==========================
 TheCodeBlogs Blog Backend
-=====
+==========================
 
 Blogging made easy
 
@@ -9,23 +9,30 @@ Settings
 
 These should go into your settings.py file.
 
-TCB_BLOG_SETTINGS = {
-    'RSS_FEED_TITLE': 'Title of the blog',
-    'RSS_FEED_LINK': '/blog/',
-    'RSS_FEED_ITEM_DESC_TEMPLATE': 'feed/entries.html'
-}
+.. code-block:: python
+
+    TCB_BLOG_SETTINGS = {
+        'RSS_FEED_TITLE': 'Title of the blog',
+        'RSS_FEED_LINK': '/blog/',
+        'RSS_FEED_ITEM_DESC_TEMPLATE': 'feed/entries.html'
+    }
+
 
 Quick start
 -----------
 
-1. Add "blog" to your INSTALLED_APPS setting like this::
+1. Add "blog" to your INSTALLED_APPS setting like this
+
+.. code-block:: python
 
    INSTALLED_APPS = [
    ...
    'blog',
    ]
 
-2. Include the polls URLconf in your project urls.py like this::
+2. Include the polls URLconf in your project urls.py like this
+
+.. code-block:: python
 
    path('blog_api/', include('blog.urls')),
 
@@ -39,3 +46,4 @@ Quick start
      to create a poll (you'll need the Admin app enabled).
 
 7. Visit http://127.0.0.1:8000/blog_api/ to see something.
+
