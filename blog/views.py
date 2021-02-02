@@ -3,11 +3,12 @@ import uuid
 from typing import Any
 from urllib.request import Request
 
+from django.conf import settings
 from django.contrib.auth.models import User, AnonymousUser
 from django.db.models import Q
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
-from django.contrib.syndication.views import Feed
+from django.contrib.syndication.views import Feed, add_domain
 from django.contrib.sites.shortcuts import get_current_site
 
 from rest_framework import viewsets, generics, status, mixins
@@ -264,10 +265,30 @@ class VisitorProfileViewSet(mixins.CreateModelMixin,
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
+USE_DEFAULTS = False
+
+
+DEFAULTS = {
+    'RSS_FEED_TITLE': 'Blog Feed',
+    'RSS_FEED_LINK': '/blog/',
+    'RSS_FEED_ITEM_DESC_TEMPLATE': 'feed/entries.html'
+}
+
+
+if not hasattr(settings, 'TCB_BLOG_SETTINGS'):
+    USE_DEFAULTS = True
+
+
+def get_setting(setting, USE_DEFAULTS):
+    if USE_DEFAULTS:
+        return DEFAULTS.get(setting)
+    else:
+        return settings.TCB_BLOG_SETTINGS.get(setting)
+
 class EntriesFeed(Feed):
-    title = "All Articles"
-    link = "/blog/"
-    description = "Every article posted to this blog"
+    title = get_setting('RSS_FEED_TITLE', USE_DEFAULTS)
+    link = get_setting('RSS_FEED_LINK', USE_DEFAULTS)
+    description_template = get_setting('RSS_FEED_ITEM_DESC_TEMPLATE', USE_DEFAULTS)
 
     def items(self):
         return EntryEnvelope.objects.filter(published=True, defunct=False).order_by('-create_date', 'entry_id',
@@ -275,8 +296,29 @@ class EntriesFeed(Feed):
     def item_title(self, item):
         return item.title
 
-    def item_description(self, item):
-        return ""
-
     def item_link(self, item):
-        return '/blog/' + str(item.slug) + '/';
+        return self.link + str(item.slug) + '/';
+
+    def get_context_data(self, item, request, **kwargs):
+        context = super().get_context_data(**kwargs)
+        try:
+            current_site = get_current_site(request)
+            first_content_type = item.entry.get('sections')[0].get('contents')[0].get('type')
+            if first_content_type == 'media':
+                value = item.entry.get('sections')[0].get('contents')[0].get('value')
+                if 'http' in value:
+                    desc = '<img src=' + value + '>'
+                else:
+                    desc = '<img src=http://' + str(current_site) + '/' + value + '>'
+            else:
+                desc = '<p>' + item.entry.get('sections')[0].get('contents')[0].get('value') + '</p>'
+        except:
+            desc = ''
+
+        title = item.title
+        readmore_link = self.link + str(item.slug) + '/';
+
+        context['desc'] = desc
+        context['title'] = title
+        context['readmore_link'] = readmore_link
+        return context

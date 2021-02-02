@@ -2,6 +2,19 @@
 TheCodeBlogs Blog Backend
 =====
 
+Blogging made easy
+
+Settings
+-----------
+
+These should go into your settings.py file.
+
+TCB_BLOG_SETTINGS = {
+    'RSS_FEED_TITLE': 'Title of the blog',
+    'RSS_FEED_LINK': '/blog/',
+    'RSS_FEED_ITEM_DESC_TEMPLATE': 'feed/entries.html'
+}
+
 Quick start
 -----------
 
