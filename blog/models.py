@@ -16,6 +16,8 @@ from pygments.formatters.html import HtmlFormatter
 from pygments.lexers.data import JsonLexer
 import logging
 
+from blog.managers import DefaultEntriesManager, DefaultCommentManager
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -85,6 +87,8 @@ class EntryEnvelope(models.Model):
     edit_date = models.DateTimeField(null=True)
 
     defunct = models.BooleanField(null=False, default=False)
+
+    objects = DefaultEntriesManager()
 
     def entry_formatted(self):
         # dump the json with indentation set
@@ -163,6 +167,8 @@ class Comment(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now_add=True)
     content = models.TextField(null=False)
+
+    objects = DefaultCommentManager
 
 
 class View(models.Model):
