@@ -2,7 +2,7 @@ from django.db.models import QuerySet, Manager, Q
 
 class EntriesQuerySet(QuerySet):
     def only_published(self):
-        return self.filter(Q(is_published=True))
+        return self.filter(Q(published=True) & Q(defunct=False))
     def for_author(self, handle):
         return self.filter(author__handle=handle)
     def with_tags(self, tags):
@@ -10,6 +10,10 @@ class EntriesQuerySet(QuerySet):
 
 
 class DefaultEntriesManager(Manager):
+
+    def get_queryset(self):
+        return EntriesQuerySet(self.model, using=self._db)
+
     def only_published(self):
         return self.get_queryset().only_published()
 

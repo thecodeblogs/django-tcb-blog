@@ -18,7 +18,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from blog.models import EntryEnvelope, Comment, Tag, View, Interaction, VisitorProfile
-from blog.permissions import IsOwnerOrReadOnly, CanPostButNotRead
+from blog.permissions import IsOwnerOrReadOnly, ReadOnly, CanPostButNotRead
 from blog.serializers import ( EntrySerializer, UserSerializer, CommentSerializer, SyncConfigSerializer, TagSerializer,
                               ViewSerializer, InteractionSerializer, VisitorProfileSerializer)
 
@@ -38,18 +38,40 @@ def get_entry_from_params(params):
 
 class EntryViewSet(viewsets.ModelViewSet):
     serializer_class = EntrySerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [ReadOnly]
     lookup_field = 'entry_id'
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['published']
+    filterset_fields = ['title']
 
     def get_queryset(self):
-        return EntryEnvelope.objects.filter(defunct=False).order_by('-create_date', 'entry_id',
+        return EntryEnvelope.objects.only_published().order_by('-create_date', 'entry_id',
                                                                      '-version').distinct('create_date', 'entry_id')
 
     @action(detail=True, methods=['get'])
     def by_slug(self, request, entry_id):
-        envelopes = EntryEnvelope.objects.filter(slug=entry_id, published=True).order_by('-create_date', 'entry_id',
+        envelopes = EntryEnvelope.objects.only_published().filter(slug=entry_id).order_by('-create_date', 'entry_id',
+                                                                         '-version').distinct('create_date', 'entry_id')
+        if envelopes.count() > 0:
+            serializer = self.get_serializer(instance=envelopes[0])
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+class AdminEntryViewSet(viewsets.ModelViewSet):
+    serializer_class = EntrySerializer
+    permission_classes = [IsOwnerOrReadOnly]
+    lookup_field = 'entry_id'
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['title', 'published', 'defunct']
+
+    def get_queryset(self):
+        return EntryEnvelope.objects.order_by('-create_date', 'entry_id',
+                                                                     '-version').distinct('create_date', 'entry_id')
+
+    @action(detail=True, methods=['get'])
+    def by_slug(self, request, entry_id):
+        envelopes = EntryEnvelope.objects.filter(slug=entry_id).order_by('-create_date', 'entry_id',
                                                                          '-version').distinct('create_date', 'entry_id')
         if envelopes.count() > 0:
             serializer = self.get_serializer(instance=envelopes[0])
