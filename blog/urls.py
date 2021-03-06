@@ -2,7 +2,7 @@ from django.urls import path
 from rest_framework.routers import DefaultRouter
 
 from blog.views import ( EntryViewSet, ListUser, CommentViewSet, SyncConfig, TagViewSet, ViewViewSet,
-                        InteractionViewSet, VisitorProfileViewSet, EntriesFeed, AdminEntryViewSet )
+                        InteractionViewSet, VisitorProfileViewSet, EntriesFeed, AdminEntryViewSet, AdminCommentViewSet )
 
 router = DefaultRouter()
 
@@ -10,6 +10,8 @@ router.register(r'entries', EntryViewSet, basename='entries')
 router.register(r'admin/entries', AdminEntryViewSet, basename='admin_entries')
 
 router.register(r'comments', CommentViewSet, basename='comments')
+router.register(r'admin/comments', AdminCommentViewSet, basename='admin_comments')
+
 router.register(r'tags', TagViewSet, basename='tags')
 router.register(r'views', ViewViewSet, basename='views')
 router.register(r'interactions', InteractionViewSet, basename='interactions')

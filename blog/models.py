@@ -168,7 +168,9 @@ class Comment(models.Model):
     modified_on = models.DateTimeField(auto_now_add=True)
     content = models.TextField(null=False)
 
-    objects = DefaultCommentManager
+    approved = models.BooleanField(null=False, default=False)
+
+    objects = DefaultCommentManager()
 
 
 class View(models.Model):

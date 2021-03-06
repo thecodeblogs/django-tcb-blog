@@ -25,14 +25,18 @@ class DefaultEntriesManager(Manager):
 
 
 class CommentQuerySet(QuerySet):
+
     def public(self):
         return self.filter(user__profile__comments_public=True)
-    # TODO: Add comment approval workflow for individual comments
+
     def approved(self):
-        return self
+        return self.filter(approved=True)
 
 
 class DefaultCommentManager(Manager):
+    def get_queryset(self):
+        return CommentQuerySet(self.model, using=self._db)
+
     def public(self):
         return self.get_queryset().public();
 

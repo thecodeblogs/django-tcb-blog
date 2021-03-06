@@ -18,7 +18,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from blog.models import EntryEnvelope, Comment, Tag, View, Interaction, VisitorProfile
-from blog.permissions import IsOwnerOrReadOnly, ReadOnly, CanPostButNotRead
+from blog.permissions import IsOwnerOrReadOnly, ReadOnly, CanPostButNotRead, CanApprove
 from blog.serializers import ( EntrySerializer, UserSerializer, CommentSerializer, SyncConfigSerializer, TagSerializer,
                               ViewSerializer, InteractionSerializer, VisitorProfileSerializer)
 
@@ -41,7 +41,7 @@ class EntryViewSet(viewsets.ModelViewSet):
     permission_classes = [ReadOnly]
     lookup_field = 'entry_id'
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['title']
+    filter_fields = ('title', 'tags__label')
 
     def get_queryset(self):
         return EntryEnvelope.objects.only_published().order_by('-create_date', 'entry_id',
@@ -88,15 +88,41 @@ class CommentViewSet(viewsets.ModelViewSet):
         entry = get_entry_from_params(self.request.query_params)
         if self.request.user.id:
             if self.request.user.is_staff:
-                return Comment.objects.filter(entry_envelope=entry)
+                return Comment.objects.filter(entry_envelope=entry).order_by('-created_on')
             else:
                 return Comment.objects.filter(
-                    (Q(user__profile__comments_public=True) | Q(user=self.request.user))
-                    & Q(entry_envelope=entry))
+                    ((Q(user__profile__comments_public=True) & Q(approved=True)) | Q(user=self.request.user))
+                    & Q(entry_envelope=entry)
+                ).order_by('-created_on')
         else:
-            return Comment.objects.filter(
-                (Q(user__profile__comments_public=True))
-                & Q(entry_envelope=entry))
+            return Comment.objects.approved().public().filter(
+                Q(entry_envelope=entry)
+            ).order_by('-created_on')
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        envelope = get_entry_from_params(self.request.query_params)
+        request.data['user'] = self.request.user.id
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.validated_data['entry_envelope'] = envelope
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class AdminCommentViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+    permission_classes = [CanApprove]
+
+    def get_queryset(self):
+        try:
+            entry = get_entry_from_params(self.request.query_params)
+        except:
+            return Comment.objects.filter(entry_envelope__author=self.request.user).order_by('-created_on')
+        return Comment.objects.filter(entry_envelope=entry).order_by('-created_on')
 
     def perform_create(self, serializer):
         serializer.save()
@@ -140,7 +166,7 @@ class SyncConfig(generics.RetrieveAPIView):
 
 class TagViewSet(viewsets.ModelViewSet):
     serializer_class = TagSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [ReadOnly]
 
     def get_queryset(self):
         return Tag.objects.all();

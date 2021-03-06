@@ -43,6 +43,13 @@ class IsUserOrReadOnly(permissions.BasePermission):
         return obj.user == request.user
 
 
+class CanApprove(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return obj.entry_envelope.author == request.user
+
+
 class InOrganization(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         user = request.user
