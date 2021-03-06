@@ -107,7 +107,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ('id', 'created_on', 'content', 'user_display_name', 'entry', 'user', 'gravatar_url')
+        fields = ('id', 'created_on', 'content', 'user_display_name', 'entry', 'user', 'gravatar_url', 'approved')
 
 
 class SyncConfigSerializer(serializers.Serializer):
