@@ -13,6 +13,18 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+@app.task(name="publish_entries_if_scheduled")
+def publish_entries_if_scheduled():
+    entries = EntryEnvelope.objects.filter(should_publish_in_future=True)
+    for entry in entries:
+        now = datetime.datetime.now()
+        if entry.future_publish_date < now:
+            entry.published = True
+            entry.publish_date = now
+            entry.future_publish_processed_on = now
+            entry.save()
+
+
 @app.task(name="sync_to_the_code_blogs")
 def sync_to_the_code_blogs(entry_envelope_id):
     ee = EntryEnvelope.objects.get(pk=entry_envelope_id)
@@ -28,6 +40,5 @@ def sync_to_the_code_blogs(entry_envelope_id):
         logger.info('Saved %s to TheCodeBlogs.com', str(ee.id))
     else:
         logger.info('No URL. Did not save %s to TheCodeBlogs.com', str(ee.id))
-
 
 

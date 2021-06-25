@@ -29,11 +29,14 @@ def get_entry_from_params(params):
         raise Exception("Invalid Entry")
 
     try:
-        entry = EntryEnvelope.objects.filter(entry_id=entry_id)[0]
+        entry = EntryEnvelope.objects.filter(entry_id=entry_id)
     except EntryEnvelope.DoesNotExist:
         raise Exception("Invalid Entry")
 
-    return entry
+    if entry.count() < 1:
+        raise Exception("Invalid Entry")
+
+    return entry[0]
 
 
 class EntryViewSet(viewsets.ModelViewSet):
@@ -85,7 +88,11 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsOwnerOrReadOnly]
 
     def get_queryset(self):
-        entry = get_entry_from_params(self.request.query_params)
+        try:
+            entry = get_entry_from_params(self.request.query_params)
+        except:
+            return Comment.objects.none()
+
         if self.request.user.id:
             if self.request.user.is_staff:
                 return Comment.objects.filter(entry_envelope=entry).order_by('-created_on')
