@@ -28,6 +28,9 @@ def publish_entries_if_scheduled():
             entry.should_publish_in_future = False
             entry.defunct = True
             entry.published = False
+
+            entry.entry['should_publish_in_future'] = False
+            entry.entry['published'] = False
             entry.save()
         else:
             if entry.future_publish_date < now:
@@ -35,6 +38,11 @@ def publish_entries_if_scheduled():
                 entry.published = True
                 entry.publish_date = now
                 entry.future_publish_processed_on = now
+
+                entry.entry['should_publish_in_future'] = False
+                entry.entry['published'] = True
+                entry.entry['publish_date'] = now.isoformat()
+
                 entry.save()
 
 
