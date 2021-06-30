@@ -15,14 +15,24 @@ logger = logging.getLogger(__name__)
 
 @app.task(name="publish_entries_if_scheduled")
 def publish_entries_if_scheduled():
-    entries = EntryEnvelope.objects.filter(should_publish_in_future=True)
+    now = datetime.datetime.now()
+    published_list = []
+    entries = EntryEnvelope.objects.filter(future_publish_date__isnull=False, should_publish_in_future=True,
+                                           defunct=False).order_by('-edit_date', 'entry_id')
     for entry in entries:
-        now = datetime.datetime.now()
-        if entry.future_publish_date < now:
-            entry.published = True
-            entry.publish_date = now
-            entry.future_publish_processed_on = now
+        if entry.entry_id in published_list:
+            logger.info('An entry for the id %s has already been published', str(entry.entry_id))
+            entry.should_publish_in_future = False
+            entry.defunct = True
+            entry.published = False
             entry.save()
+        else:
+            if entry.future_publish_date < now:
+                entry.should_publish_in_future = False
+                entry.published = True
+                entry.publish_date = now
+                entry.future_publish_processed_on = now
+                entry.save()
 
 
 @app.task(name="sync_to_the_code_blogs")

@@ -26,7 +26,7 @@ class EntrySerializer(serializers.BaseSerializer):
             'slug': instance.entry.get('slug'),
             'published': instance.entry.get('published'),
             'publish_date': instance.entry.get('publish_date'),
-            'user_requested_future_publish': instance.entry.get('user_requested_future_publish'),
+            'should_publish_in_future': instance.entry.get('should_publish_in_future'),
             'future_publish_date': instance.entry.get('future_publish_date'),
             'version': instance.entry.get('version'),
             'tags': instance.entry.get('tags'),
@@ -45,7 +45,7 @@ class EntrySerializer(serializers.BaseSerializer):
         slug = data.get('slug')
         published = data.get('published')
         publish_date = data.get('publish_date')
-        user_requested_future_publish = data.get('user_requested_future_publish')
+        should_publish_in_future = data.get('should_publish_in_future')
         future_publish_date = data.get('future_publish_date')
         version = data.get('version')
         tags = data.get('tags')
@@ -59,7 +59,7 @@ class EntrySerializer(serializers.BaseSerializer):
             'slug': slug,
             'published': published,
             'publish_date': publish_date,
-            'user_requested_future_publish': user_requested_future_publish,
+            'should_publish_in_future': should_publish_in_future,
             'future_publish_date': future_publish_date,
             'version': version,
             'tags': tags

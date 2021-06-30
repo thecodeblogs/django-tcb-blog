@@ -126,14 +126,8 @@ class EntryEnvelope(models.Model):
         self.publish_date = self.entry.get('publish_date')
         self.version = self.entry.get('version')
 
-        self.user_requested_future_publish = self.entry.get('user_requested_future_publish')
+        self.should_publish_in_future = self.entry.get('should_publish_in_future')
         self.future_publish_date = self.entry.get('future_publish_date')
-
-        # One of the only variables that doesn't come from schema
-        if self.user_requested_future_publish:
-            self.should_publish_in_future = self.user_requested_future_publish
-        else:
-            self.should_publish_in_future = False
 
         tags = self.entry.get('tags')
         if tags:
