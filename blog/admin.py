@@ -19,7 +19,11 @@ class EntryAdmin(admin.ModelAdmin):
         ('From Blog Schema', {'fields': ['slug', 'title',
                                          'published', 'publish_date',
                                          'create_date', 'edit_date',
-                                         'defunct']}),
+                                         'defunct',
+                                         'future_publish_date',
+                                         'future_publish_processed_on',
+                                         'user_requested_future_publish',
+                                         'should_publish_in_future']}),
         ('JSON', {'fields': ['entry_formatted']}),
     ]
     list_display = ('entry_id', 'title', 'get_usable_email', 'published', 'defunct')

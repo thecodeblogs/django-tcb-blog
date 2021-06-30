@@ -83,6 +83,11 @@ class EntryEnvelope(models.Model):
     published = models.BooleanField(null=False, default=False)
     publish_date = models.DateTimeField(null=True)
 
+    user_requested_future_publish = models.BooleanField(null=True, blank=True)
+    should_publish_in_future = models.BooleanField(null=False, blank=False, default=False)
+    future_publish_date = models.DateTimeField(null=True)
+    future_publish_processed_on = models.DateTimeField(null=True)
+
     create_date = models.DateTimeField(null=True)
     edit_date = models.DateTimeField(null=True)
 
@@ -121,6 +126,9 @@ class EntryEnvelope(models.Model):
         self.publish_date = self.entry.get('publish_date')
         self.version = self.entry.get('version')
 
+        self.should_publish_in_future = self.entry.get('should_publish_in_future')
+        self.future_publish_date = self.entry.get('future_publish_date')
+
         tags = self.entry.get('tags')
         if tags:
             for entry_tag in tags:
@@ -141,7 +149,7 @@ def manage_publish_states(entry_envelope_id):
     entry_id = ee.entry_id
     logger.info('Marking all other entries unpublished for %s', entry_id)
     all_other_entries = EntryEnvelope.objects.filter(entry_id=entry_id, version__lt=ee.version).exclude(id=entry_envelope_id)
-    all_other_entries.update(published=False, defunct=True)
+    all_other_entries.update(published=False, defunct=True, should_publish_in_future=False)
 
 
 @receiver(post_save, sender=EntryEnvelope)
