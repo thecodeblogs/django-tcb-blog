@@ -1,5 +1,7 @@
 import logging
 import requests
+import datetime
+import pytz
 
 from backend.celery import app
 from django.dispatch import receiver
@@ -9,13 +11,14 @@ from blog.models import EntryEnvelope
 from blog.serializers import EntrySerializer
 
 
+utc = pytz.UTC
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 @app.task(name="publish_entries_if_scheduled")
 def publish_entries_if_scheduled():
-    now = datetime.datetime.now()
+    now = utc.localize(datetime.datetime.now())
     published_list = []
     entries = EntryEnvelope.objects.filter(future_publish_date__isnull=False, should_publish_in_future=True,
                                            defunct=False).order_by('-edit_date', 'entry_id')
